@@ -6,8 +6,9 @@ In many projects, members are often required to fund the project in advance. How
 
 # Features
 - Calculate individual contributions.
-- Update revenue
+- Update revenue.
 - Distribute rewards proportionally based on contribution percentages.
+- The project is mostly powered by AI in the current state.
 
 # Contract
 Contract link: https://stellar.expert/explorer/testnet/contract/CB5OUR6UWJKNEKC6OLWFLW75GPGO4X5TWP6O62YADSEPIAIJ63A3SWXI
@@ -16,7 +17,7 @@ Contract link: https://stellar.expert/explorer/testnet/contract/CB5OUR6UWJKNEKC6
 
 
 # Future scopes
-My plan is to enhance the user interface (UI) and enable real-time distribution in future updates.
+My plan is to enhance the user interface (UI),enable real-time distribution in future updates.
 
 # Profile
 * Name: Nhân
