@@ -1,0 +1,480 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Revenue Share dApp</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #090b12;
+      color: #e7edf5;
+      line-height: 1.5;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+      background: radial-gradient(circle at top left, rgba(56, 139, 255, 0.18), transparent 34%),
+                  radial-gradient(circle at bottom right, rgba(164, 81, 255, 0.16), transparent 28%),
+                  #090b12;
+    }
+
+    .app-shell {
+      width: min(1120px, 100%);
+      padding: 32px;
+      border: 1px solid rgba(255,255,255,.06);
+      border-radius: 28px;
+      background: rgba(12, 15, 25, 0.88);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.35);
+      display: grid;
+      gap: 32px;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 0;
+      color: #9badc8;
+      font-size: 0.95rem;
+    }
+
+    .button {
+      border: none;
+      border-radius: 999px;
+      padding: 14px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      background: linear-gradient(135deg, #4f81ff 0%, #7e5bff 100%);
+      color: #fff;
+      box-shadow: 0 10px 30px rgba(79, 129, 255, 0.25);
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 16px 36px rgba(79, 129, 255, 0.28);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.6fr 0.9fr;
+      gap: 28px;
+    }
+
+    .hero-card,
+    .side-panel {
+      border-radius: 24px;
+      padding: 28px;
+      background: rgba(16, 21, 36, 0.9);
+      border: 1px solid rgba(255,255,255,.05);
+    }
+
+    .hero-card h2 {
+      margin: 0 0 16px;
+      font-size: clamp(1.6rem, 2vw, 2rem);
+    }
+
+    .hero-card p {
+      color: #b8c6db;
+      margin: 0 0 26px;
+      max-width: 660px;
+    }
+
+    .feature-list {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 18px;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .feature-item::before {
+      content: '•';
+      color: #7e5bff;
+      display: inline-block;
+      width: 18px;
+      text-align: center;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .feature-item span {
+      color: #d8e2f0;
+      font-size: 0.97rem;
+    }
+
+    .form-row {
+      display: grid;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .field-group {
+      display: grid;
+      gap: 8px;
+    }
+
+    label {
+      color: #8da2c7;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    input,
+    select {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: #edf2ff;
+      font-size: 1rem;
+    }
+
+    input::placeholder {
+      color: #7b8ba3;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+    }
+
+    .status-panel {
+      display: grid;
+      gap: 18px;
+    }
+
+    .status-block {
+      display: grid;
+      gap: 10px;
+      padding: 22px;
+      border-radius: 20px;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .status-block label {
+      display: block;
+      color: #7b8ba3;
+      font-size: 0.86rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      margin-bottom: 6px;
+    }
+
+    .status-block .value {
+      color: #f2f7ff;
+      word-break: break-all;
+      font-weight: 600;
+    }
+
+    .result-panel {
+      padding: 22px;
+      border-radius: 20px;
+      background: #0e1427;
+      border: 1px solid rgba(126, 91, 255, 0.16);
+      display: grid;
+      gap: 12px;
+    }
+
+    .result-panel h3 {
+      margin: 0;
+      font-size: 1rem;
+      letter-spacing: 0.01em;
+    }
+
+    .result-panel .result {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #c8d6ff;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
+    .footer-note {
+      color: #7b8ba3;
+      font-size: 0.9rem;
+      margin-top: 4px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="header">
+      <div class="brand">
+        <h1>Revenue Share dApp</h1>
+        <p>Connect the frontend to your Soroban contract methods.</p>
+      </div>
+      <button class="button" id="connectButton">Connect Wallet</button>
+    </header>
+
+    <div class="main-grid">
+      <section class="hero-card">
+        <h2>Main Feature: Claim Reward</h2>
+        <p>This UI is wired to the contract methods defined in <code>lib.rs</code>. Use the action selector to call <strong>init</strong>, <strong>contribute</strong>, <strong>update_revenue</strong>, or <strong>claim_reward</strong>.</p>
+
+        <div class="feature-list">
+          <div class="feature-item"><span>Wallet state tracking</span></div>
+          <div class="feature-item"><span>Contract method selection</span></div>
+          <div class="feature-item"><span>Transaction result preview</span></div>
+        </div>
+
+        <div class="form-row">
+          <div class="field-group">
+            <label for="contributorAddress">Contributor Address</label>
+            <input id="contributorAddress" type="text" placeholder="G..." />
+          </div>
+
+          <div class="field-group">
+            <label for="amountInput">Amount</label>
+            <input id="amountInput" type="number" placeholder="100" min="0" />
+          </div>
+
+          <div class="field-group">
+            <label for="actionSelect">Selected Action</label>
+            <select id="actionSelect">
+              <option value="init">Init contract</option>
+              <option value="contribute">Contribute</option>
+              <option value="update_revenue">Update revenue</option>
+              <option value="claim_reward">Claim reward</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button class="button secondary-button" id="actionButton">Submit Action</button>
+          <button class="button secondary-button" id="clearButton">Clear Result</button>
+        </div>
+      </section>
+
+      <aside class="side-panel">
+        <div class="status-panel">
+          <div class="status-block">
+            <label>Wallet Address</label>
+            <div class="value" id="walletAddress">Not connected</div>
+          </div>
+
+          <div class="status-block">
+            <label>Connection Status</label>
+            <div class="value" id="connectionStatus">Disconnected</div>
+          </div>
+
+          <div class="status-block">
+            <label>Contract ID</label>
+            <div class="value" id="contractId">CB5OUR6UWJKNEKC6OLWFLW75GPGO4X5TWP6O62YADSEPIAIJ63A3SWXI</div>
+          </div>
+        </div>
+
+        <div class="result-panel">
+          <h3>Transaction Result</h3>
+          <div class="result" id="transactionResult">No transaction yet.</div>
+          <div class="footer-note">After contract deployment, replace the contract ID constant with your value to enable real calls.</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@stellar/soroban-client@0.25.0/dist/soroban-client.min.js"></script>
+  <script>
+    const connectButton = document.getElementById('connectButton');
+    const actionButton = document.getElementById('actionButton');
+    const clearButton = document.getElementById('clearButton');
+    const walletAddress = document.getElementById('walletAddress');
+    const connectionStatus = document.getElementById('connectionStatus');
+    const transactionResult = document.getElementById('transactionResult');
+    const contractIdDisplay = document.getElementById('contractId');
+    const contributorAddressInput = document.getElementById('contributorAddress');
+    const amountInput = document.getElementById('amountInput');
+    const actionSelect = document.getElementById('actionSelect');
+
+    const contractId = 'CB5OUR6UWJKNEKC6OLWFLW75GPGO4X5TWP6O62YADSEPIAIJ63A3SWXI';
+    const horizonUrl = 'https://horizon-testnet.stellar.org';
+    const networkPassphrase = SorobanClient.Networks.TESTNET;
+    contractIdDisplay.textContent = contractId;
+
+    let connected = false;
+    let walletPublicKey = '';
+
+    function generateFakeAddress() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+      let address = 'G';
+      for (let i = 0; i < 55; i++) {
+        address += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return address;
+    }
+
+    function setResult(message) {
+      transactionResult.textContent = message;
+    }
+
+    function buildContractAction() {
+      const action = actionSelect.value;
+      const contributor = contributorAddressInput.value.trim();
+      const amount = amountInput.value.trim();
+
+      if ((action === 'contribute' || action === 'update_revenue' || action === 'claim_reward') && !contributor) {
+        setResult('Enter the contributor address to proceed.');
+        return null;
+      }
+
+      if ((action === 'contribute' || action === 'update_revenue') && !amount) {
+        setResult('Enter an amount for this action.');
+        return null;
+      }
+
+      return { action, contributor, amount };
+    }
+
+    async function connectWallet() {
+      if (window.freighterApi) {
+        try {
+          walletPublicKey = await window.freighterApi.getPublicKey();
+          connected = true;
+          walletAddress.textContent = walletPublicKey;
+          connectionStatus.textContent = 'Connected';
+          connectButton.textContent = 'Disconnect Wallet';
+          setResult('Connected via Freighter. Choose an action and submit.');
+          return;
+        } catch (error) {
+          setResult('Failed to connect via Freighter: ' + error.message);
+          return;
+        }
+      }
+
+      // Fallback demo connection for the UI
+      connected = true;
+      walletPublicKey = generateFakeAddress();
+      walletAddress.textContent = walletPublicKey;
+      connectionStatus.textContent = 'Connected (demo)';
+      connectButton.textContent = 'Disconnect Wallet';
+      setResult('Demo wallet connected. On a real app, install Freighter or a Soroban wallet.');
+    }
+
+    function disconnectWallet() {
+      connected = false;
+      walletPublicKey = '';
+      walletAddress.textContent = 'Not connected';
+      connectionStatus.textContent = 'Disconnected';
+      connectButton.textContent = 'Connect Wallet';
+      setResult('No transaction yet.');
+    }
+
+    async function submitContractAction(payload) {
+      if (!connected) {
+        setResult('Connect a wallet first before submitting contract actions.');
+        return;
+      }
+
+      if (contractId.includes('REPLACE_WITH_DEPLOYED_ID')) {
+        setResult('Replace the contract ID with your deployed contract ID in the HTML file.');
+        return;
+      }
+
+      try {
+        // This is the place to use the Soroban client and wallet provider.
+        // If using Freighter, you would build and sign a transaction here.
+        const demoArgs = [];
+        if (payload.contributor) demoArgs.push(`contributor=${payload.contributor}`);
+        if (payload.amount) demoArgs.push(`amount=${payload.amount}`);
+
+        setResult(`Ready to send:\nContract: ${contractId}\nMethod: ${payload.action}\nArgs: ${demoArgs.join(', ')}`);
+
+        // Example skeleton:
+        // const server = new SorobanClient.Server(horizonUrl);
+        // const sourceAccount = await server.loadAccount(walletPublicKey);
+        // const tx = new SorobanClient.TransactionBuilder(sourceAccount, {
+        //   fee: '100',
+        //   networkPassphrase,
+        // })
+        //   .addOperation(SorobanClient.Operation.invokeHostFunction({
+        //     function: SorobanClient.HostFunction.invokeContract(
+        //       contractId,
+        //       payload.action,
+        //       [/* build ScVals here */],
+        //     ),
+        //     auth: [],
+        //   }))
+        //   .setTimeout(30)
+        //   .build();
+        // const signedTx = await window.freighterApi.signTransaction(tx.toEnvelope().toXDR('base64'));
+        // const response = await server.submitTransaction(signedTx);
+        // setResult('Transaction hash: ' + response.hash);
+      } catch (error) {
+        setResult('Contract submission failed: ' + error.message);
+      }
+    }
+
+    connectButton.addEventListener('click', () => {
+      if (connected) {
+        disconnectWallet();
+      } else {
+        connectWallet();
+      }
+    });
+
+    actionButton.addEventListener('click', async () => {
+      const payload = buildContractAction();
+      if (!payload) return;
+      await submitContractAction(payload);
+    });
+
+    clearButton.addEventListener('click', () => {
+      contributorAddressInput.value = '';
+      amountInput.value = '';
+      setResult('No transaction yet.');
+    });
+  </script>
+</body>
+</html>
