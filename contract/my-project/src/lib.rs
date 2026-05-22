@@ -12,14 +12,6 @@ pub struct RevenueShareContract;
 impl RevenueShareContract {
     
     // 1. Hàm khởi tạo quỹ
-    pub fn init(env: Env) {
-        env.storage().instance().set(&TOTAL_FUNDS, &0_i128);
-        env.storage().instance().set(&REVENUE, &0_i128);
-        
-        let empty_shares: Map<Address, i128> = Map::new(&env);
-        env.storage().instance().set(&SHARES, &empty_shares);
-    }
-
     // 2. Hàm nạp tiền góp quỹ (Giai đoạn chuẩn bị dự án)
     pub fn contribute(env: Env, contributor: Address, amount: i128) {
         contributor.require_auth();
@@ -64,5 +56,20 @@ impl RevenueShareContract {
          * Để giữ MVP đơn giản nhất, ta trả về số tiền mà họ xứng đáng được nhận để test logic.
          */
         my_reward
+    }
+
+    // Read-only preview function: compute reward without requiring auth
+    pub fn preview_reward(env: Env, contributor: Address) -> i128 {
+        let shares: Map<Address, i128> = env.storage().instance().get(&SHARES).unwrap_or(Map::new(&env));
+        let my_contribution = shares.get(contributor.clone()).unwrap_or(0);
+
+        let total_contributed: i128 = env.storage().instance().get(&TOTAL_FUNDS).unwrap_or(0);
+        let total_revenue: i128 = env.storage().instance().get(&REVENUE).unwrap_or(0);
+
+        if my_contribution == 0 || total_contributed == 0 || total_revenue == 0 {
+            return 0;
+        }
+
+        (my_contribution * total_revenue) / total_contributed
     }
 }

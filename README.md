@@ -1,15 +1,22 @@
 # Title
 Revenue Share
-# Description
-Why you do this project
-# Features
-Detailed features
-# Contract
-Contract link (e.g. https://stellar.expert/explorer/testnet/contract/CBT5F3UMMV3MVWAU34YCIKXB6AMDAO7YXU3P2FITUVACVAFGRMZVYA5X?filter=history)
 
-Contract's screenshot
+# Description
+In many projects, members are often required to fund the project in advance. However, when the project wins rewards or prizes, distributing the money fairly among members can be difficult. Therefore, this project aims to distribute the prizes to each member based on their percentage of contribution.
+
+# Features
+- Calculate individual contributions.
+- Update revenue
+- Distribute rewards proportionally based on contribution percentages.
+
+# Contract
+Contract link: https://stellar.expert/explorer/testnet/contract/CB5OUR6UWJKNEKC6OLWFLW75GPGO4X5TWP6O62YADSEPIAIJ63A3SWXI
+
+![Contract Deployment Screenshot](Screenshot.png)
 
 # Future scopes
-What are your future plan
+My plan is to enhance the user interface (UI) and enable real-time distribution in future updates.
+
 # Profile
-Your name, skills, ... 
+* Name: Nhân
+* Affiliation: Faculty of Information Technology, University of Science, VNU-HCM (HCMUS)

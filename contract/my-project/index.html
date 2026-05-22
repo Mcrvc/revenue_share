@@ -262,7 +262,7 @@
     <div class="main-grid">
       <section class="hero-card">
         <h2>Main Feature: Claim Reward</h2>
-        <p>This UI is wired to the contract methods defined in <code>lib.rs</code>. Use the action selector to call <strong>init</strong>, <strong>contribute</strong>, <strong>update_revenue</strong>, or <strong>claim_reward</strong>.</p>
+        <p>This UI is wired to the contract methods defined in <code>lib.rs</code>. Use the action selector to call <strong>contribute</strong>, <strong>update_revenue</strong>, or <strong>claim_reward</strong>.</p>
 
         <div class="feature-list">
           <div class="feature-item"><span>Wallet state tracking</span></div>
@@ -284,7 +284,6 @@
           <div class="field-group">
             <label for="actionSelect">Selected Action</label>
             <select id="actionSelect">
-              <option value="init">Init contract</option>
               <option value="contribute">Contribute</option>
               <option value="update_revenue">Update revenue</option>
               <option value="claim_reward">Claim reward</option>
@@ -340,7 +339,9 @@
 
     const contractId = 'CB5OUR6UWJKNEKC6OLWFLW75GPGO4X5TWP6O62YADSEPIAIJ63A3SWXI';
     const horizonUrl = 'https://horizon-testnet.stellar.org';
-    const networkPassphrase = SorobanClient.Networks.TESTNET;
+    const networkPassphrase = (typeof SorobanClient !== 'undefined' && SorobanClient && SorobanClient.Networks && SorobanClient.Networks.TESTNET)
+      ? SorobanClient.Networks.TESTNET
+      : 'Test SDF Network ; September 2015';
     contractIdDisplay.textContent = contractId;
 
     let connected = false;
@@ -377,6 +378,34 @@
       return { action, contributor, amount };
     }
 
+    function updateFormForAction() {
+      const action = actionSelect.value;
+      if (action === 'claim_reward') {
+        amountInput.value = '';
+        amountInput.disabled = true;
+        amountInput.placeholder = 'Calculated by contract';
+      } else {
+        amountInput.disabled = false;
+        amountInput.placeholder = '100';
+      }
+
+      contributorAddressInput.disabled = false;
+      contributorAddressInput.placeholder = 'G...';
+
+      // If previewable action, trigger a preview for demo mode
+      if (action === 'claim_reward' && contributorAddressInput.value.trim()) {
+        const payload = { action: 'claim_reward', contributor: contributorAddressInput.value.trim() };
+        submitContractAction(payload);
+      }
+    }
+
+    contributorAddressInput.addEventListener('input', () => {
+      if (actionSelect.value === 'claim_reward') {
+        const payload = { action: 'claim_reward', contributor: contributorAddressInput.value.trim() };
+        submitContractAction(payload);
+      }
+    });
+
     async function connectWallet() {
       if (window.freighterApi) {
         try {
@@ -386,6 +415,8 @@
           connectionStatus.textContent = 'Connected';
           connectButton.textContent = 'Disconnect Wallet';
           setResult('Connected via Freighter. Choose an action and submit.');
+          // Auto-fill contributor when wallet connects
+          if (!contributorAddressInput.disabled) contributorAddressInput.value = walletPublicKey;
           return;
         } catch (error) {
           setResult('Failed to connect via Freighter: ' + error.message);
@@ -399,6 +430,8 @@
       walletAddress.textContent = walletPublicKey;
       connectionStatus.textContent = 'Connected (demo)';
       connectButton.textContent = 'Disconnect Wallet';
+      // Auto-fill contributor when demo wallet connects
+      if (!contributorAddressInput.disabled) contributorAddressInput.value = walletPublicKey;
       setResult('Demo wallet connected. On a real app, install Freighter or a Soroban wallet.');
     }
 
@@ -425,11 +458,69 @@
       try {
         // This is the place to use the Soroban client and wallet provider.
         // If using Freighter, you would build and sign a transaction here.
+        // Demo-mode local state (stored in localStorage) to simulate contract behavior
+        const demo_shares_key = 'demo_shares_v1';
+        const demo_total_key = 'demo_total_v1';
+        const demo_revenue_key = 'demo_revenue_v1';
+
+        function readDemoState() {
+          const shares = JSON.parse(localStorage.getItem(demo_shares_key) || '{}');
+          const total = parseInt(localStorage.getItem(demo_total_key) || '0', 10);
+          const revenue = parseInt(localStorage.getItem(demo_revenue_key) || '0', 10);
+          return { shares, total, revenue };
+        }
+
+        function writeDemoState({ shares, total, revenue }) {
+          localStorage.setItem(demo_shares_key, JSON.stringify(shares));
+          localStorage.setItem(demo_total_key, String(total));
+          localStorage.setItem(demo_revenue_key, String(revenue));
+        }
+
+        // If Freighter is not present, operate on demo state so preview/claim show values
+        if (!window.freighterApi) {
+          const state = readDemoState();
+
+          if (payload.action === 'contribute') {
+            const amt = parseInt(payload.amount || '0', 10);
+            state.shares[payload.contributor] = (state.shares[payload.contributor] || 0) + amt;
+            state.total = (state.total || 0) + amt;
+            writeDemoState(state);
+            setResult(`Demo: ${payload.contributor} contributed ${amt}. Total funds: ${state.total}`);
+            return;
+          }
+
+          if (payload.action === 'update_revenue') {
+            const amt = parseInt(payload.amount || '0', 10);
+            state.revenue = (state.revenue || 0) + amt;
+            writeDemoState(state);
+            setResult(`Demo: revenue increased by ${amt}. Total revenue: ${state.revenue}`);
+            return;
+          }
+
+          if (payload.action === 'claim_reward') {
+            // compute reward from demo state
+            const myContribution = state.shares[payload.contributor] || 0;
+            const totalContributed = state.total || 0;
+            const totalRevenue = state.revenue || 0;
+            let myReward = 0;
+            if (myContribution > 0 && totalContributed > 0 && totalRevenue > 0) {
+              myReward = Math.floor((myContribution * totalRevenue) / totalContributed);
+            }
+            setResult(`Demo claim preview:\nContributor: ${payload.contributor}\nMy contribution: ${myContribution}\nTotal contributed: ${totalContributed}\nTotal revenue: ${totalRevenue}\nComputed reward: ${myReward}`);
+            return;
+          }
+        }
+
+        // Production skeleton (not executed in demo): prepare args for real transaction
         const demoArgs = [];
         if (payload.contributor) demoArgs.push(`contributor=${payload.contributor}`);
         if (payload.amount) demoArgs.push(`amount=${payload.amount}`);
 
-        setResult(`Ready to send:\nContract: ${contractId}\nMethod: ${payload.action}\nArgs: ${demoArgs.join(', ')}`);
+        if (payload.action === 'claim_reward') {
+          setResult(`Ready to send:\nContract: ${contractId}\nMethod: ${payload.action}\nArgs: ${demoArgs.join(', ')}\nNote: amount will be computed by the contract.`);
+        } else {
+          setResult(`Ready to send:\nContract: ${contractId}\nMethod: ${payload.action}\nArgs: ${demoArgs.join(', ')}`);
+        }
 
         // Example skeleton:
         // const server = new SorobanClient.Server(horizonUrl);
@@ -463,6 +554,11 @@
         connectWallet();
       }
     });
+
+    // Update form controls depending on chosen action
+    actionSelect.addEventListener('change', updateFormForAction);
+    // initialize form state
+    updateFormForAction();
 
     actionButton.addEventListener('click', async () => {
       const payload = buildContractAction();
